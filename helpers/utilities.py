@@ -19,9 +19,9 @@ keras.utils.set_random_seed(42)
 np.random.seed(42)
 random.seed(42)
 
-def show_samples(label):
+def show_samples(label, dir):
 
-    folder = os.path.join(train_dir, label)
+    folder = os.path.join(dir, label)
     files = os.listdir(folder)[:5]
 
     plt.figure(figsize=(12,3))
