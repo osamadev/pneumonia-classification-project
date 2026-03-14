@@ -550,19 +550,19 @@ def visualize_gradcam_samples(
     plt.show()
 
 
-def build_tuned_model(hp):
-    inputs = layers.Input(shape=CONFIG["input_shape"])
+def build_tuned_model(hp, config):
+    inputs = layers.Input(shape=config["input_shape"])
     x = inputs
-    base_filters = hp.Choice("base_filters", CONFIG["base_filters"])
+    base_filters = hp.Choice("base_filters", config["base_filters"])
 
     num_stages = hp.Int(
         "num_stages",
-        min_value=CONFIG["num_stages"]["min"],
-        max_value=CONFIG["num_stages"]["max"]
+        min_value=config["num_stages"]["min"],
+        max_value=config["num_stages"]["max"]
     )
 
-    reduction = hp.Choice("se_reduction", CONFIG["se_reduction"])
-    l2_reg = hp.Choice("l2_reg", CONFIG["l2_reg"])
+    reduction = hp.Choice("se_reduction", config["se_reduction"])
+    l2_reg = hp.Choice("l2_reg", config["l2_reg"])
 
     # Initial layer
     x = layers.Conv2D(base_filters,7,strides=2,padding="same")(x)
@@ -581,7 +581,7 @@ def build_tuned_model(hp):
 
     x = layers.GlobalAveragePooling2D()(x)
     x = layers.BatchNormalization()(x)
-    dense_units = hp.Choice("dense_units", CONFIG["dense_units"])
+    dense_units = hp.Choice("dense_units", config["dense_units"])
 
     x = layers.Dense(
         dense_units,
@@ -591,16 +591,16 @@ def build_tuned_model(hp):
 
     dropout_rate = hp.Float(
         "dropout",
-        min_value=CONFIG["dropout"]["min"],
-        max_value=CONFIG["dropout"]["max"],
-        step=CONFIG["dropout"]["step"]
+        min_value=config["dropout"]["min"],
+        max_value=config["dropout"]["max"],
+        step=config["dropout"]["step"]
     )
 
     x = layers.Dropout(dropout_rate)(x)
     outputs = layers.Dense(1, activation="sigmoid")(x)
     model = models.Model(inputs, outputs)
 
-    lr = hp.Choice("learning_rate", CONFIG["learning_rates"])
+    lr = hp.Choice("learning_rate", config["learning_rates"])
 
     model.compile(
 
