@@ -521,7 +521,7 @@ def visualize_gradcam_samples(
         img_array = np.expand_dims(test_image, axis=0)
 
         # Prediction
-        prediction = model.predict(img_array, verbose=0)[0][0]
+        prediction = model.predict([img_array], verbose=0)[0][0]
         pred_class = 1 if prediction > 0.5 else 0
         pred_label = class_names[pred_class]
         true_label_name = class_names[true_label]
@@ -529,7 +529,7 @@ def visualize_gradcam_samples(
         result = "✓" if pred_class == true_label else "✗"
 
         # Grad-CAM
-        heatmap = make_gradcam_heatmap(img_array, model, last_conv_layer_name)
+        heatmap = make_gradcam_heatmap([img_array], model, last_conv_layer_name)
         img = test_image.squeeze()
         heatmap = cv2.resize(heatmap, (img.shape[1], img.shape[0]))
 
