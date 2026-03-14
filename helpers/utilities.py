@@ -126,10 +126,10 @@ geom_augment = tf.keras.Sequential([
     #layers.RandomZoom(0.15),
     #layers.RandomTranslation(0.1, 0.1),
     layers.RandomFlip("horizontal"),
-    layers.RandomRotation(0.1),
-    layers.RandomZoom(0.15),
-    layers.RandomTranslation(0.1, 0.1),
-    layers.RandomContrast(0.15),
+    layers.RandomRotation(0.05),
+    layers.RandomZoom(0.10),
+    layers.RandomTranslation(0.05, 0.05),
+    layers.RandomContrast(0.10),
 ])
 
 def augment(image, label):
