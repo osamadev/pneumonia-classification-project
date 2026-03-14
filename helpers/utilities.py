@@ -120,6 +120,7 @@ def preprocess_image(path, label, IMG_SIZE=224):
     image = tf.cast(image, tf.float32) / 255.0
     return image, label
 
+"""
 geom_augment = tf.keras.Sequential([
     #layers.RandomFlip("horizontal"),
     #layers.RandomRotation(0.1),
@@ -146,6 +147,17 @@ def augment(image, label):
     #    size=[224, 224, 1]
     #)
 
+    return image, label
+"""
+
+def augment(image, label):
+    image = tf.image.random_flip_left_right(image)
+    image = tf.image.random_brightness(image, 0.1)
+    image = tf.image.random_contrast(image, 0.9, 1.1)
+    image = tf.image.random_crop(
+        tf.image.resize_with_pad(image, 230, 230),
+        size=[224,224,1]
+    )
     return image, label
 
 AUTOTUNE = tf.data.AUTOTUNE
@@ -272,7 +284,7 @@ def get_callbacks(config=None):
     lr_factor = config.get("lr_reduce_factor", 0.3)
     min_lr = config.get("min_lr", 1e-6)
 
-    checkpoint_path = config.get("checkpoint_path", "best_cxr_model.h5")
+    checkpoint_path = config.get("checkpoint_path", "best_baseline_model.keras")
 
     log_dir = config.get(
         "tensorboard_log_dir",
