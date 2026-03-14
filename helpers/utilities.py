@@ -126,10 +126,10 @@ geom_augment = tf.keras.Sequential([
     #layers.RandomZoom(0.15),
     #layers.RandomTranslation(0.1, 0.1),
     layers.RandomFlip("horizontal"),
-    layers.RandomRotation(0.05),
-    layers.RandomZoom(0.10),
-    layers.RandomTranslation(0.05, 0.05),
-    layers.RandomContrast(0.10),
+    layers.RandomRotation(0.1),
+    layers.RandomZoom(0.15),
+    layers.RandomTranslation(0.1, 0.1),
+    layers.RandomContrast(0.15),
 ])
 
 def augment(image, label):
@@ -141,22 +141,22 @@ def augment(image, label):
     #image = tf.image.random_contrast(image, 0.9, 1.1)
 
     # resize + random crop
-    image = tf.image.random_crop(
-        tf.image.resize_with_pad(image, 230, 230),
-        size=[224, 224, 1]
-    )
+    #image = tf.image.random_crop(
+    #    tf.image.resize_with_pad(image, 230, 230),
+    #    size=[224, 224, 1]
+    #)
 
     return image, label
 
 AUTOTUNE = tf.data.AUTOTUNE
 BATCH_SIZE = 32
 
-def build_dataset(paths, labels, training=False):
+def build_dataset(paths, labels, augmentation=False):
     paths = [str(p) for p in paths]
     dataset = tf.data.Dataset.from_tensor_slices((paths, labels))
     dataset = dataset.map(preprocess_image, num_parallel_calls=AUTOTUNE)
 
-    if training:
+    if augmentation:
         dataset = dataset.map(augment, num_parallel_calls=AUTOTUNE)
         dataset = dataset.shuffle(2000)
 
