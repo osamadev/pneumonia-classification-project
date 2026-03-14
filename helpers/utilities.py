@@ -141,10 +141,10 @@ def augment(image, label):
     #image = tf.image.random_contrast(image, 0.9, 1.1)
 
     # resize + random crop
-     image = tf.image.random_crop(
+    image = tf.image.random_crop(
         tf.image.resize_with_pad(image, 230, 230),
         size=[224, 224, 1]
-     )
+    )
 
     return image, label
 
