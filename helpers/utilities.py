@@ -1,3 +1,24 @@
+import os
+import random
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from PIL import Image
+
+import tensorflow as tf
+import keras
+from keras import layers
+
+#from tensorflow.keras import layers
+
+from tensorflow.keras import layers, models, regularizers
+
+keras.utils.set_random_seed(42)
+np.random.seed(42)
+random.seed(42)
+
 def show_samples(label):
 
     folder = os.path.join(train_dir, label)
