@@ -10,6 +10,7 @@ from PIL import Image
 from datetime import datetime
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import roc_curve, auc
+from sklearn.utils.class_weight import compute_class_weight
 
 from skimage.measure import shannon_entropy, graycomatrix, graycoprops
 
@@ -139,10 +140,10 @@ def augment(image, label):
     #image = tf.image.random_contrast(image, 0.9, 1.1)
 
     # resize + random crop
-    #image = tf.image.random_crop(
-    #    tf.image.resize_with_pad(image, 230, 230),
-    #    size=[224, 224, 1]
-    #)
+    image = tf.image.random_crop(
+        tf.image.resize_with_pad(image, 230, 230),
+        size=[224, 224, 1]
+    )
 
     return image, label
 
@@ -162,6 +163,22 @@ def build_dataset(paths, labels, training=False):
     dataset = dataset.prefetch(AUTOTUNE)
 
     return dataset
+
+def get_class_weights(y, method='balanced'):
+    """
+    Computes class weights for imbalanced datasets.
+
+    Args:
+        y (array-like): Array of labels
+        method (str, optional): Method for computing weights. Default is 'balanced'
+
+    Returns:
+        dict: Mapping from class index to weight
+    """
+    classes = np.unique(y)
+    weights = compute_class_weight(class_weight=method, classes=classes, y=y)
+    return dict(enumerate(weights))
+    
 
 def se_block(inputs, reduction):
     filters = inputs.shape[-1]
