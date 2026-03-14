@@ -550,7 +550,7 @@ def visualize_gradcam_samples(
     plt.show()
 
 
-def build_tuned_model(hp, CONFIG):
+def build_tuned_model(hp):
     inputs = layers.Input(shape=CONFIG["input_shape"])
     x = inputs
     base_filters = hp.Choice("base_filters", CONFIG["base_filters"])
