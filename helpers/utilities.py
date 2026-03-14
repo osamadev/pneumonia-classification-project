@@ -12,7 +12,8 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import roc_curve, auc
 from sklearn.utils.class_weight import compute_class_weight
 
-from skimage.measure import shannon_entropy, graycomatrix, graycoprops
+from skimage.measure import shannon_entropy
+from skimage.feature import graycomatrix, graycoprops
 
 import tensorflow as tf
 import keras
