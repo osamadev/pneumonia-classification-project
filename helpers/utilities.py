@@ -548,3 +548,72 @@ def visualize_gradcam_samples(
 
     plt.tight_layout()
     plt.show()
+
+
+def build_tuned_model(hp):
+    inputs = layers.Input(shape=CONFIG["input_shape"])
+    x = inputs
+    base_filters = hp.Choice("base_filters", CONFIG["base_filters"])
+
+    num_stages = hp.Int(
+        "num_stages",
+        min_value=CONFIG["num_stages"]["min"],
+        max_value=CONFIG["num_stages"]["max"]
+    )
+
+    reduction = hp.Choice("se_reduction", CONFIG["se_reduction"])
+    l2_reg = hp.Choice("l2_reg", CONFIG["l2_reg"])
+
+    # Initial layer
+    x = layers.Conv2D(base_filters,7,strides=2,padding="same")(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.ReLU()(x)
+
+    x = layers.MaxPooling2D(3,strides=2,padding="same")(x)
+    filters = base_filters
+
+    for stage in range(num_stages):
+        x = residual_block(x, filters, stride=1, reduction=reduction, l2_reg=l2_reg)
+        x = residual_block(x, filters, stride=1, reduction=reduction, l2_reg=l2_reg)
+        filters *= 2
+        if stage < num_stages - 1:
+            x = residual_block(x, filters, stride=2, reduction=reduction, l2_reg=l2_reg)
+
+    x = layers.GlobalAveragePooling2D()(x)
+    x = layers.BatchNormalization()(x)
+    dense_units = hp.Choice("dense_units", CONFIG["dense_units"])
+
+    x = layers.Dense(
+        dense_units,
+        activation="relu",
+        kernel_regularizer=regularizers.l2(l2_reg)
+    )(x)
+
+    dropout_rate = hp.Float(
+        "dropout",
+        min_value=CONFIG["dropout"]["min"],
+        max_value=CONFIG["dropout"]["max"],
+        step=CONFIG["dropout"]["step"]
+    )
+
+    x = layers.Dropout(dropout_rate)(x)
+    outputs = layers.Dense(1, activation="sigmoid")(x)
+    model = models.Model(inputs, outputs)
+
+    lr = hp.Choice("learning_rate", CONFIG["learning_rates"])
+
+    model.compile(
+
+        optimizer=tf.keras.optimizers.Adam(lr),
+
+        loss="binary_crossentropy",
+
+        metrics=[
+            "accuracy",
+            tf.keras.metrics.AUC(name="auc"),
+            tf.keras.metrics.Precision(),
+            tf.keras.metrics.Recall()
+        ]
+    )
+
+    return model
