@@ -266,7 +266,7 @@ def build_baseline_model(input_shape=(224,224,1)):
         kernel_regularizer=regularizers.l2(1e-4)
     )(x)
 
-    x = layers.Dropout(0.5)(x)
+    x = layers.Dropout(0.3)(x)
 
     outputs = layers.Dense(1, activation='sigmoid')(x)
 
