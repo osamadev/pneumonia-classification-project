@@ -113,7 +113,7 @@ def build_data_augmentation(
     brightness_delta: float = 0.05,
     name: str = "data_augmentation",
 ) -> tf.keras.Sequential:
-    """Paper-aligned augmentation stack (Table 3 + mild brightness jitter)."""
+    """Augmentation stack for image data."""
     return tf.keras.Sequential(
         [
             layers.RandomFlip("horizontal"),
@@ -137,14 +137,14 @@ def compute_class_weights(
 
     strategy:
       - 'balanced': sklearn balanced weighting.
-      - 'paper_ratio': use majority/minority ratio as the minority class weight.
+      - 'predefined_ratio': use majority/minority ratio as the minority class weight.
     """
     labels_arr = np.asarray(labels).astype(int)
     classes = np.unique(labels_arr)
     if classes.shape[0] < 2:
         return {int(classes[0]): 1.0}
 
-    if strategy == "paper_ratio":
+    if strategy == "predefined_ratio":
         class_counts = {int(c): int(np.sum(labels_arr == c)) for c in classes}
         minority = min(class_counts, key=class_counts.get)
         majority = max(class_counts, key=class_counts.get)

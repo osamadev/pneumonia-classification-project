@@ -16,7 +16,7 @@ def build_vgg16_model(
     freeze_base: bool = True,
     name: str = "vgg16_frozen",
 ) -> keras.Model:
-    """Build VGG16 transfer learning model aligned to paper setup."""
+    """Build VGG16 transfer learning model"""
     base_model = keras.applications.VGG16(
         weights="imagenet",
         include_top=False,
@@ -53,7 +53,7 @@ def build_baseline_cnn(
     augmentation_layer: keras.Model | None = None,
     learning_rate: float = 1e-3,
     l2_reg: float = 1e-4,
-    name: str = "pneumonia_cnn_v2",
+    name: str = "pneumonia_cnn",
 ) -> keras.Model:
     """Build the baseline CNN architecture extracted from notebook."""
     inputs = keras.Input(shape=(img_size[0], img_size[1], 3))
