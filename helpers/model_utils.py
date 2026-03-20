@@ -110,9 +110,14 @@ def build_baseline_cnn(
     l2_reg: float = 1e-4,
     name: str = "pneumonia_cnn",
 ) -> keras.Model:
-    """Build the baseline CNN architecture extracted from notebook."""
+    """Build the baseline CNN architecture extracted from notebook.
+    If augmentation_layer is None, the input will be directly scaled.
+    """
     inputs = keras.Input(shape=(img_size[0], img_size[1], 3))
-    x = augmentation_layer(inputs) if augmentation_layer else inputs
+    if augmentation_layer is not None:
+        x = augmentation_layer(inputs)
+    else:
+        x = inputs
     x = layers.Rescaling(1.0 / 255)(x)
 
     for filters in [32, 64, 128, 256]:
