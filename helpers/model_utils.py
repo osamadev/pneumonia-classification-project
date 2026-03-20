@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import numpy as np
 import keras
 from keras import layers
 
@@ -9,14 +10,20 @@ from keras import layers
 def build_vgg16_model(
     img_size: tuple[int, int],
     augmentation_layer: keras.Model,
-    dense_units: int = 128,
+    dense_units: int = 256,
     dense_units_2: int = 128,
-    dropout: float = 0.25,
+    dropout: float = 0.5,
+    dropout_2: float = 0.3,
     learning_rate: float = 1e-4,
     freeze_base: bool = True,
     name: str = "vgg16_frozen",
 ) -> keras.Model:
-    """Build VGG16 transfer learning model"""
+    """Build VGG16 transfer learning model with BN-regularized dense head.
+
+    Expects raw [0, 255] images — VGG16 preprocessing is applied internally
+    after augmentation so that augmentation operates on natural pixel values.
+    Do NOT pass pre-processed datasets to this model.
+    """
     base_model = keras.applications.VGG16(
         weights="imagenet",
         include_top=False,
@@ -29,9 +36,18 @@ def build_vgg16_model(
     x = keras.applications.vgg16.preprocess_input(x)
     x = base_model(x, training=False)
     x = layers.GlobalAveragePooling2D()(x)
-    x = layers.Dense(dense_units, activation="relu")(x)
+    x = layers.Dense(
+        dense_units, activation="relu",
+        kernel_regularizer=keras.regularizers.l2(1e-4),
+    )(x)
+    x = layers.BatchNormalization()(x)
     x = layers.Dropout(dropout)(x)
-    x = layers.Dense(dense_units_2, activation="relu")(x)
+    x = layers.Dense(
+        dense_units_2, activation="relu",
+        kernel_regularizer=keras.regularizers.l2(1e-4),
+    )(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Dropout(dropout_2)(x)
     outputs = layers.Dense(1, activation="sigmoid")(x)
 
     model = keras.Model(inputs, outputs, name=name)
@@ -45,6 +61,45 @@ def build_vgg16_model(
             keras.metrics.Recall(name="recall"),
         ],
     )
+    return model
+
+
+def unfreeze_vgg16_top_block(model: keras.Model, learning_rate: float = 1e-5) -> keras.Model:
+    """Unfreeze VGG16 block5 (last conv block) for fine-tuning.
+
+    Locates the VGG16 base inside the model, makes block5_conv1/2/3 and
+    block5_pool trainable, then re-compiles with a reduced learning rate.
+    Returns the same model object (modified in-place).
+    """
+    vgg_base = None
+    for layer in model.layers:
+        if isinstance(layer, keras.Model) and layer.name == "vgg16":
+            vgg_base = layer
+            break
+    if vgg_base is None:
+        raise ValueError("Could not find VGG16 base layer named 'vgg16' inside model.")
+
+    # Unfreeze only the last conv block to avoid disrupting lower-level features.
+    block5_names = {"block5_conv1", "block5_conv2", "block5_conv3", "block5_pool"}
+    vgg_base.trainable = True
+    for layer in vgg_base.layers:
+        layer.trainable = layer.name in block5_names
+
+    model.compile(
+        optimizer=keras.optimizers.Adam(learning_rate=learning_rate, clipnorm=1.0),
+        loss=keras.losses.BinaryCrossentropy(),
+        metrics=[
+            "accuracy",
+            keras.metrics.AUC(name="auc"),
+            keras.metrics.Precision(name="precision"),
+            keras.metrics.Recall(name="recall"),
+        ],
+    )
+    trainable_count = int(sum(
+        np.prod(w.shape) for w in model.trainable_weights
+    ))
+    print(f"Unfrozen: {block5_names}")
+    print(f"Trainable params after unfreeze: {trainable_count:,}")
     return model
 
 

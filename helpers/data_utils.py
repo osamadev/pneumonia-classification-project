@@ -217,8 +217,6 @@ def build_train_val_test_datasets(
         .prefetch(autotune)
     )
 
-    train_ds = train_ds.prefetch(autotune)
-
     metadata = {
         "train_paths": train_paths,
         "train_labels_raw": train_labels_raw,
