@@ -108,7 +108,7 @@ def build_data_augmentation(
     rotation: float = 30.0,
     width_shift: float = 0.1,
     height_shift: float = 0.1,
-    shear: float = 0.1,
+    shear: float = 0.2,
     zoom: float = 0.2,
     brightness_delta: float = 0.05,
     name: str = "data_augmentation",

@@ -10,6 +10,7 @@ def build_vgg16_model(
     img_size: tuple[int, int],
     augmentation_layer: keras.Model,
     dense_units: int = 128,
+    dense_units_2: int = 128,
     dropout: float = 0.25,
     learning_rate: float = 1e-4,
     freeze_base: bool = True,
@@ -30,6 +31,7 @@ def build_vgg16_model(
     x = layers.GlobalAveragePooling2D()(x)
     x = layers.Dense(dense_units, activation="relu")(x)
     x = layers.Dropout(dropout)(x)
+    x = layers.Dense(dense_units_2, activation="relu")(x)
     outputs = layers.Dense(1, activation="sigmoid")(x)
 
     model = keras.Model(inputs, outputs, name=name)
@@ -48,14 +50,14 @@ def build_vgg16_model(
 
 def build_baseline_cnn(
     img_size: tuple[int, int],
-    augmentation_layer: keras.Model,
+    augmentation_layer: keras.Model | None = None,
     learning_rate: float = 1e-3,
     l2_reg: float = 1e-4,
     name: str = "pneumonia_cnn_v2",
 ) -> keras.Model:
     """Build the baseline CNN architecture extracted from notebook."""
     inputs = keras.Input(shape=(img_size[0], img_size[1], 3))
-    x = augmentation_layer(inputs)
+    x = augmentation_layer(inputs) if augmentation_layer else inputs
     x = layers.Rescaling(1.0 / 255)(x)
 
     for filters in [32, 64, 128, 256]:
