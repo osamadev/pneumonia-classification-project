@@ -89,7 +89,8 @@ def load_model_compat(model_path: str | Path, compile: bool = True):
         return keras.models.load_model(model_path, compile=compile)
     except Exception as first_error:
         random_shear_cls = keras.layers.RandomShear
-        original_from_config_attr = random_shear_cls.__dict__["from_config"]
+        # Use getattr (not __dict__) because from_config is inherited, not
+        # defined directly on RandomShear — __dict__ lookup would KeyError.
         original_from_config = random_shear_cls.from_config
 
         def _patched_from_config(cls, config):
@@ -99,7 +100,7 @@ def load_model_compat(model_path: str | Path, compile: bool = True):
                 if isinstance(value, (list, tuple)) and len(value) == 2:
                     low = float(value[0])
                     high = float(value[1])
-                    # Legacy configs may store symmetric ranges like [-0.2, 0.2].
+                    # Legacy configs store symmetric ranges like [-0.2, 0.2].
                     config[key] = max(abs(low), abs(high))
             return original_from_config(config)
 
@@ -110,7 +111,10 @@ def load_model_compat(model_path: str | Path, compile: bool = True):
             # Preserve the original error context for easier debugging.
             raise first_error
         finally:
-            random_shear_cls.from_config = original_from_config_attr
+            # Remove the dynamically-added patch so the inherited from_config
+            # is visible again via normal MRO. Guard in case patch was not set.
+            if "from_config" in random_shear_cls.__dict__:
+                delattr(random_shear_cls, "from_config")
 
 
 def load_model_meta(save_dir: str | Path, name: str):
