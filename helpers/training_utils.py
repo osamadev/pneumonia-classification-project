@@ -135,12 +135,16 @@ def get_training_callbacks(
     monitor: str = "val_loss",
 ):
     """Shared callback bundle used for both notebooks."""
+    # Keras auto mode only recognises "acc" and "loss" patterns.
+    # For metrics like "val_auc" or "val_pr_auc" we must set mode explicitly.
+    mode = "min" if "loss" in monitor else "max"
     return [
         keras.callbacks.EarlyStopping(
             monitor=monitor,
             patience=patience,
             restore_best_weights=True,
             verbose=1,
+            mode=mode,
         ),
         keras.callbacks.ReduceLROnPlateau(
             monitor=monitor,
@@ -148,12 +152,14 @@ def get_training_callbacks(
             patience=max(1, patience // 2),
             min_lr=1e-7,
             verbose=1,
+            mode=mode,
         ),
         keras.callbacks.ModelCheckpoint(
             filepath=str(checkpoint_path),
             monitor=monitor,
             save_best_only=True,
             verbose=1,
+            mode=mode,
         ),
         keras.callbacks.TerminateOnNaN(),
     ]
@@ -163,7 +169,7 @@ def tune_threshold(model: keras.Model, val_ds, num_points: int = 91):
     """Tune decision threshold on validation data using F1 on PNEUMONIA class."""
     y_true_batches, y_prob_batches = [], []
     for images, labels in val_ds:
-        probs = model.predict(images, verbose=0).ravel()
+        probs = model(images, training=False).numpy().ravel()
         y_prob_batches.append(probs)
         y_true_batches.append(labels.numpy().ravel().astype(int))
 
@@ -193,7 +199,7 @@ def evaluate_model(model: keras.Model, test_ds, threshold: float):
     """Evaluate model on test dataset and return metrics + raw vectors."""
     y_true_batches, y_prob_batches = [], []
     for images, labels in test_ds:
-        probs = model.predict(images, verbose=0).ravel()
+        probs = model(images, training=False).numpy().ravel()
         y_prob_batches.append(probs)
         y_true_batches.append(labels.numpy().ravel().astype(int))
 
