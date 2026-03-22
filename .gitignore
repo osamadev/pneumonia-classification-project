@@ -6,3 +6,5 @@ saved_models - Copy/
 *.zip
 .claude/
 claude.md
+saved_models/
+helpers/__pycache__/
