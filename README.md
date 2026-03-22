@@ -64,7 +64,7 @@ pip install -r requirements.txt
 Why this order:
 - EDA validates data and assumptions
 - CNN notebook builds baseline and tuned references
-- Transfer notebook applies VGG16 strategy and paper-aligned weighting choices
+- Transfer learning notebook applies VGG16 strategy (partial re-training of the pre-trained model).
 
 ## Saving and Loading Models
 
