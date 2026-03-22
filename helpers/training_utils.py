@@ -78,12 +78,7 @@ def make_model_saver(save_dir: str | Path):
 
 
 def load_model_compat(model_path: str | Path, compile: bool = True):
-    """Load a Keras model with fallback fixes for augmentation layer configs.
-
-    This handles checkpoints saved with RandomShear configs that serialize
-    factors as symmetric ranges (e.g. [-0.2, 0.2]) that some newer Keras
-    versions reject during deserialization.
-    """
+    """Load a Keras model with fallback fixes for augmentation layer configs."""
     try:
         return keras.models.load_model(model_path, compile=compile)
  
@@ -135,6 +130,7 @@ def get_training_callbacks(
     monitor: str = "val_loss",
 ):
     """Shared callback bundle used for both notebooks."""
+    
     mode = "min" if "loss" in monitor else "max"
     return [
         keras.callbacks.EarlyStopping(
