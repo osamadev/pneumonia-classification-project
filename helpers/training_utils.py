@@ -135,8 +135,6 @@ def get_training_callbacks(
     monitor: str = "val_loss",
 ):
     """Shared callback bundle used for both notebooks."""
-    # Keras auto mode only recognises "acc" and "loss" patterns.
-    # For metrics like "val_auc" or "val_pr_auc" we must set mode explicitly.
     mode = "min" if "loss" in monitor else "max"
     return [
         keras.callbacks.EarlyStopping(
