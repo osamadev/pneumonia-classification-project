@@ -19,10 +19,6 @@ def build_vgg16_model(
     name: str = "vgg16_frozen",
 ) -> keras.Model:
     """Build VGG16 transfer learning model with BN-regularized dense head.
-
-    Expects raw [0, 255] images — VGG16 preprocessing is applied internally
-    after augmentation so that augmentation operates on natural pixel values.
-    Do NOT pass pre-processed datasets to this model.
     """
     base_model = keras.applications.VGG16(
         weights="imagenet",
