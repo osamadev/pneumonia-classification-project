@@ -84,6 +84,13 @@ streamlit run app.py
 
 Then open the local URL shown in terminal (usually `http://localhost:8501`).
 
+Examples:
+
+<img width="1182" height="538" alt="Screenshot 2026-03-23 at 09 16 05" src="https://github.com/user-attachments/assets/c5992e18-3e65-4495-86ce-0fb70c97bb20" />
+
+<img width="1095" height="539" alt="Screenshot 2026-03-23 at 09 16 26" src="https://github.com/user-attachments/assets/b8951780-f21f-42a1-b97b-2ec7520075c9" />
+
+
 ## Using the Streamlit App
 
 1. Select a model from the sidebar
